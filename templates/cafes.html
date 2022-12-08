@@ -12,16 +12,18 @@ Restaurants
       <h1>All Cafes</h1>
 	  <table class="table">
           {% for data in cafes %}
-          <thead>
             <tr>
-              <th scope="col"></th>
+                {% for row in data %}
+                {% if row[0:4] == "http" %}
+                <td><a href="{{ row }} " target="_blank" rel="noopener noreferrer">Location Here</a></td>
+                {% else %}
+                <td>{{row}}</td>
+                {% endif %}
+                {% endfor %}
             </tr>
-          </thead>
           {% endfor %}
   	  </table>
-
-      <p><a href="#">Return to index page</a></p>
-
+      <p><a href="{{url_for('home')}}">Return to index page</a></p>
     </div>
   </div>
 </div>
