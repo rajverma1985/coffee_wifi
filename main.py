@@ -1,3 +1,6 @@
+import json
+import random
+
 from flask import Flask, jsonify, render_template, request
 from flask_sqlalchemy import SQLAlchemy
 
@@ -9,7 +12,8 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 
-# Cafe TABLE Configuration
+# Cafe db TABLE Configuration
+
 class Cafe(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250), unique=True, nullable=False)
@@ -23,13 +27,29 @@ class Cafe(db.Model):
     can_take_calls = db.Column(db.Boolean, nullable=False)
     coffee_price = db.Column(db.String(250), nullable=True)
 
+    def to_dict(self):
+        return {key: value for key, value in self.__dict__.items() if key != "_sa_instance_state"}
+
 
 @app.route("/")
 def home():
     return render_template("index.html")
 
 
+@app.route("/random", methods=['GET', 'POST'])
+def random_cafes():
+    cafes = db.session.query(Cafe).all()
+    random_cafe = random.choice(cafes).to_dict()
+    return random_cafe
+
+
 # HTTP GET - Read Record
+@app.route("/all", methods=['GET'])
+def get_all_cafes():
+    all_cafes = db.session.query(Cafe).all()
+    return jsonify({"cafe":[cafe.to_dict() for cafe in all_cafes]})
+
+
 
 # HTTP POST - Create Record
 
