@@ -58,6 +58,22 @@ def search_cafes():
 
 
 # HTTP POST - Create Record
+@app.route("/add", methods=['POST'])
+def add_cafes():
+    try:
+        cafe = Cafe()
+        for key in request.args.keys():
+            if key in ['has_sockets', 'has_toilet', 'has_wifi', 'can_take_calls']:  # Test for boolean type attributes
+                value = bool(value)
+            else:
+                value = request.args.get(key)
+            cafe.__setattr__(key, value)
+        db.session.add(cafe)
+        db.session.commit()
+    except Exception as error:
+        return {"response": {"error": "{}".format(error)}}
+    return {"response": {"success": "cafe added"}}
+
 
 # HTTP PUT/PATCH - Update Record
 
