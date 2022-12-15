@@ -44,10 +44,16 @@ def random_cafes():
 
 
 # HTTP GET - Read Record
+@app.route("/cafes", methods=['GET'])
 @app.route("/all", methods=['GET'])
 def get_all_cafes():
-    all_cafes = db.session.query(Cafe).all()
-    return jsonify({"cafe": [cafe.to_dict() for cafe in all_cafes]})
+    if request.args.get('id'):
+        cafe_id = request.args.get('id')
+        all_cafes = db.session.query(Cafe).filter_by(id=cafe_id).all()
+        return jsonify({"cafe": [cafe.to_dict() for cafe in all_cafes]})
+    else:
+        all_cafes = db.session.query(Cafe).all()
+        return jsonify({"cafe": [cafe.to_dict() for cafe in all_cafes]})
 
 
 @app.route("/search", methods=['GET'])
@@ -76,6 +82,17 @@ def add_cafes():
 
 
 # HTTP PUT/PATCH - Update Record
+@app.route('/update-price/<int:cafe_id>', methods=['PATCH'])
+def update_price(cafe_id):
+    new_price = request.args.get('new_price')
+    cafe = db.session.query(Cafe).get(cafe_id)
+    if cafe:
+        cafe.coffee_price = new_price
+        db.session.commit()
+        return jsonify({"success": "Successfully updated the price."})
+    else:
+        return jsonify({"error":
+                            {"Not Found": "Sorry a cafe with that id was not found in the database."}})
 
 # HTTP DELETE - Delete Record
 
