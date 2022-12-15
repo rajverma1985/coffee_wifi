@@ -49,8 +49,12 @@ def random_cafes():
 def get_all_cafes():
     if request.args.get('id'):
         cafe_id = request.args.get('id')
-        all_cafes = db.session.query(Cafe).filter_by(id=cafe_id).all()
-        return jsonify({"cafe": [cafe.to_dict() for cafe in all_cafes]})
+        cafe = db.session.query(Cafe).get(cafe_id)
+        if cafe:
+            all_cafes = db.session.query(Cafe).filter_by(id=cafe_id).all()
+            return jsonify({"cafe": [cafe.to_dict() for cafe in all_cafes]})
+        else:
+            return jsonify(error={"Not Found": "Sorry a cafe with that id was not found in the database."}), 404
     else:
         all_cafes = db.session.query(Cafe).all()
         return jsonify({"cafe": [cafe.to_dict() for cafe in all_cafes]})
@@ -94,7 +98,22 @@ def update_price(cafe_id):
         return jsonify({"error":
                             {"Not Found": "Sorry a cafe with that id was not found in the database."}})
 
+
 # HTTP DELETE - Delete Record
+@app.route('/report-closed/<int:cafe_id>')
+def delete_cafe(cafe_id):
+    api_key = request.args.get('api-key')
+    if api_key == "TopSecretAPIKey":
+        cafe = db.session.query(Cafe).get(cafe_id)
+        if cafe:
+            db.session.delete(cafe)
+            db.session.commit()
+            return jsonify(response={"success": "Successfully deleted the cafe from the database."}), 200
+        else:
+            return jsonify(error={"Not Found": "Sorry a cafe with that id was not found in the database."}), 404
+    else:
+        return jsonify(error={"Forbidden": "Sorry, that's not allowed. Make sure you have the correct api_key."}), 403
+
 
 
 if __name__ == '__main__':
